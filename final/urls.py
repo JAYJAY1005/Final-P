@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include('main.urls')),
     path('QnA/', include('QnA.urls')), 
     path('accounts/', include('allauth.urls')),
+    path('', include('api.urls')),
 ]

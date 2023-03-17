@@ -38,8 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    'QnA.apps.QnaConfig',
+    'rest_framework',
 
+    'QnA.apps.QnaConfig',
+    
+    'api',
     'main',
     # 로그인 기능 추가
     'django.contrib.sites',
