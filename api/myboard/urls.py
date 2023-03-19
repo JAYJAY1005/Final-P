@@ -22,4 +22,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
+    # 라우터가 posts 라는 이름을 설정해 주었기 때문에 별도의 경로 이름 설정을 하지않음
+    path('', include('posts.urls')), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

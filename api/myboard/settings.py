@@ -39,7 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    # 유저 로그인 앱 등록
     'users',
+    # 게시글 앱 등록
+    'posts',
+    # 장고 검색 필터 패키지 pip install django-filter 로 설치
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -108,6 +113,10 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+    ],
+    # 설치한 django filter 적용
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
     ],
 }
 
