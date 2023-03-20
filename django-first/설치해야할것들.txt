@@ -1,0 +1,2 @@
+
+pip install djangorestframe-work

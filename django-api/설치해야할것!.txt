@@ -1,0 +1,5 @@
+필터로 검색이 가능 myboard/settings.py 에 있음
+- 파이썬 3.9.13 에서 작업하지 않을시 레스트 프레임 워크가 인식(import) 되지 않음
+
+pip install django-filter
+

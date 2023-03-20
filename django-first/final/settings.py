@@ -123,7 +123,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -148,4 +148,4 @@ SITE_ID = 1
 
 ACCOUNT_EMAIL_REQUIRED = True # 회원 가입시 반드시 이메일 받기 기능 
 ACCOUNT_EMAIL_VERIFICATION = 'none' # 그 이메일이 맞는기 검증하는 기능은 작동하지 않게함
-LOGIN_REDIRECT_URL = '/main/'
+LOGIN_REDIRECT_URL = '/main/' # 로그인 성공시 이동할 주소 현재 main 으로 설정
