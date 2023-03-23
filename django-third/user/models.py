@@ -5,11 +5,13 @@ from django.contrib.auth import authenticate
 
 # 일반 유저 모델 설정 
 class User(AbstractUser):
-    id = models.AutoField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
+    userid = models.CharField(max_length=12)
     username = models.CharField(max_length=50)
     phone = models.CharField(max_length=11,verbose_name='전화번호',unique=True)
     password = models.CharField(max_length=256, verbose_name='비밀번호')
-    
+    email = models.CharField(max_length=255,verbose_name='이메일',unique=True)
+
     def new_user(self,name,phone,password):
         user = User.objects.create_user(name,None,password)
         user.phone = phone
@@ -32,7 +34,7 @@ class User(AbstractUser):
         db_table = 'users'
     
     # id로 나오게 설정 유니크한 값만 넣을 수 있음
-    USERNAME_FIELD = 'id'
+    USERNAME_FIELD = 'email'
 
 # 질문란
 class Posts(models.Model):
@@ -52,7 +54,6 @@ class Posts(models.Model):
 # 댓글란
 class Comments(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.ForeignKey(Question, on_delete=models.CASCADE)
     content = models.TextField()
     create_at = models.DateTimeField()
     updated_at = models.DateTimeField(null=True, blank=True)
@@ -62,4 +63,4 @@ class Comments(models.Model):
         return self.content
 
     class Meta:
-        db_table = 'Comments'
+        db_table = 'comments'

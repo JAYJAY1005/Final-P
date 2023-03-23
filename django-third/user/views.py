@@ -1,120 +1,161 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from .models import Posts, Commants
+from .models import Posts, Comments
 from .forms import PostsForm, CommentsForm
 from django.http import HttpResponseNotAllowed,HttpResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.contrib.auth import logout,login
+from django.contrib.auth.models import User
+
+# 로그인 기능 구현
+def Login(request):
+    if request.method == 'GET':
+        redirect('main')
+    elif request.method == "POST":
+        email = request.POST['email']
+        password = request.POST['password']
+
+        user = User.auth(email, password)
+
+        if user is not None:
+            print("인증성공")
+            login(request,user)
+        else:
+            print("인증실패")
+        
+        return redirect('main')
+
+def Logout(request):
+    logout(request)
+    return redirect('main')
+
+# 회원 가입 기능 구현
+def signup(request):
+    data = {}
+    if request.method == 'GET':
+        data['page'] = '회원가입'
+        return render(request, 'signup.html', data)
+    elif request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+
+        print(f'{username} {email} {password}')
+
+        user = User()
+        user.new_user(username, email, password)
+        return render(request, 'main.html', data)
 
 def index(request):
     page = request.GET.get('page', '1')  # 페이지
     kw = request.GET.get('kw', '')  # 검색어
-    question_list = Question.objects.order_by('-create_date') # 생성한 날짜 보이기
+    Posts_list = Posts.objects.order_by('-create_date') # 생성한 날짜 보이기
     if kw:
-        question_list = question_list.filter(
+        Posts_list = Posts_list.filter(
             Q(subject__icontains=kw) |  # 제목 검색
             Q(content__icontains=kw) |  # 내용 검색
-            Q(answer__content__icontains=kw) |  # 답변 내용 검색
+            Q(Comments__content__icontains=kw) |  # 답변 내용 검색
             Q(author__username__icontains=kw) |  # 질문 글쓴이 검색
-            Q(answer__author__username__icontains=kw)  # 답변 글쓴이 검색
+            Q(Comments__author__username__icontains=kw)  # 답변 글쓴이 검색
         ).distinct()
-    paginator = Paginator(question_list, 10)  # 페이지당 10개씩 보여주기
+    paginator = Paginator(Posts_list, 10)  # 페이지당 10개씩 보여주기
     page_obj = paginator.get_page(page)
-    context = {'question_list': page_obj, 'page': page, 'kw': kw}
-    return render(request, 'QnA/question_list.html', context)
+    context = {'Posts_list': page_obj, 'page': page, 'kw': kw}
+    return render(request, 'QnA/Posts_list.html', context)
 
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    context = {'question': question}
-    return render(request, 'QnA/question_detail.html', context)
+def detail(request, Posts_id):
+    Posts = get_object_or_404(Posts, pk=Posts_id)
+    context = {'Posts': Posts}
+    return render(request, 'QnA/Posts_detail.html', context)
 
 @login_required
-def answer_create(request, question_id):
+def Comments_create(request, Posts_id):
     """
     QnA 답변등록
     """
-    question = get_object_or_404(Question, pk=question_id)
+    Posts = get_object_or_404(Posts, pk=Posts_id)
     if request.method == "POST":
-        form = AnswerForm(request.POST)
+        form = CommentsForm(request.POST)
         if form.is_valid():
-            answer = form.save(commit=False)
-            answer.author = request.user  # author 속성에 로그인 계정 저장
-            answer.create_date = timezone.now()
-            answer.question = question
-            answer.save()
-            return redirect('QnA:detail', question_id=question.id)
+            Comments = form.save(commit=False)
+            Comments.author = request.user  # author 속성에 로그인 계정 저장
+            Comments.create_date = timezone.now()
+            Comments.Posts = Posts
+            Comments.save()
+            return redirect('QnA:detail', Posts_id=Posts.id)
     else:
         return HttpResponseNotAllowed('Only POST is possible.')
-    context = {'question': question, 'form': form}
-    return render(request, 'QnA/question_detail.html', context)
+    context = {'Posts': Posts, 'form': form}
+    return render(request, 'QnA/Posts_detail.html', context)
 
 @login_required
-def question_create(request):
+def Posts_create(request):
     if request.method == 'POST':
-        form = QuestionForm(request.POST)
+        form = PostsForm(request.POST)
         if form.is_valid():
-            question = form.save(commit=False)
-            question.author = request.user  # author 속성에 로그인 계정 저장
-            question.create_date = timezone.now()
-            question.save()
+            Posts = form.save(commit=False)
+            Posts.author = request.user  # author 속성에 로그인 계정 저장
+            Posts.create_date = timezone.now()
+            Posts.save()
             return redirect('QnA:index')
     else:
-        form = QuestionForm()
+        form = PostsForm()
     context = {'form': form}
-    return render(request, 'QnA/question_form.html', context)
+    return render(request, 'QnA/Posts_form.html', context)
 
 @login_required
-def question_modify(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    if request.user != question.author:
+def Posts_modify(request, Posts_id):
+    Posts = get_object_or_404(Posts, pk=Posts_id)
+    if request.user != Posts.author:
         messages.error(request, '수정권한이 없습니다')
-        return redirect('QnA:detail', question_id=question.id)
+        return redirect('QnA:detail', Posts_id=Posts.id)
     if request.method == "POST":
-        form = QuestionForm(request.POST, instance=question)
+        form = PostsForm(request.POST, instance=Posts)
         if form.is_valid():
-            question = form.save(commit=False)
-            question.modify_date = timezone.now()  # 수정일시 저장
-            question.save()
-            return redirect('QnA:detail', question_id=question.id)
+            Posts = form.save(commit=False)
+            Posts.modify_date = timezone.now()  # 수정일시 저장
+            Posts.save()
+            return redirect('QnA:detail', Posts_id=Posts.id)
     else:
-        form = QuestionForm(instance=question)
+        form = PostsForm(instance=Posts)
     context = {'form': form}
-    return render(request, 'QnA/question_form.html', context)
+    return render(request, 'QnA/Posts_form.html', context)
 
 @login_required
-def question_delete(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    if request.user != question.author:
+def Posts_delete(request, Posts_id):
+    Posts = get_object_or_404(Posts, pk=Posts_id)
+    if request.user != Posts.author:
         messages.error(request, '삭제권한이 없습니다')
-        return redirect('QnA:detail', question_id=question.id)
-    question.delete()
+        return redirect('QnA:detail', Posts_id=Posts.id)
+    Posts.delete()
     return redirect('QnA:index')
 
 @login_required
-def answer_modify(request, answer_id):
-    answer = get_object_or_404(Answer, pk=answer_id)
-    if request.user != answer.author:
+def Comments_modify(request, Comments_id):
+    Comments = get_object_or_404(Comments, pk=Comments_id)
+    if request.user != Comments.author:
         messages.error(request, '수정권한이 없습니다')
-        return redirect('QnA:detail', question_id=answer.question.id)
+        return redirect('QnA:detail', Posts_id=Comments.Posts.id)
     if request.method == "POST":
-        form = AnswerForm(request.POST, instance=answer)
+        form = CommentsForm(request.POST, instance=Comments)
         if form.is_valid():
-            answer = form.save(commit=False)
-            answer.modify_date = timezone.now()
-            answer.save()
-            return redirect('QnA:detail', question_id=answer.question.id)
+            Comments = form.save(commit=False)
+            Comments.modify_date = timezone.now()
+            Comments.save()
+            return redirect('QnA:detail', Posts_id=Comments.Posts.id)
     else:
-        form = AnswerForm(instance=answer)
-    context = {'answer': answer, 'form': form}
-    return render(request, 'QnA/answer_form.html', context)
+        form = CommentsForm(instance=Comments)
+    context = {'Comments': Comments, 'form': form}
+    return render(request, 'QnA/Comments_form.html', context)
 
 @login_required
-def answer_delete(request, answer_id):
-    answer = get_object_or_404(Answer, pk=answer_id)
-    if request.user != answer.author:
+def Comments_delete(request, Comments_id):
+    Comments = get_object_or_404(Comments, pk=Comments_id)
+    if request.user != Comments.author:
         messages.error(request, '삭제권한이 없습니다')
     else:
-        answer.delete()
-    return redirect('QnA:detail', question_id=answer.question.id)
+        Comments.delete()
+    return redirect('QnA:detail', Posts_id=Comments.Posts.id)
