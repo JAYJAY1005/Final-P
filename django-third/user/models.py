@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate
 # 일반 유저 모델 설정 
 class User(AbstractUser):
     id = models.BigAutoField(primary_key=True)
-    userid = models.CharField(max_length=12)
+    userid = models.CharField(max_length=12,unique=True)
     username = models.CharField(max_length=50)
     phone = models.CharField(max_length=11,verbose_name='전화번호',unique=True)
     password = models.CharField(max_length=256, verbose_name='비밀번호')
@@ -31,10 +31,10 @@ class User(AbstractUser):
         return self.username
     
     class Meta:
-        db_table = 'users'
+        db_table = 'user'
     
     # id로 나오게 설정 유니크한 값만 넣을 수 있음
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'userid'
 
 # 질문란
 class Posts(models.Model):

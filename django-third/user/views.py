@@ -49,6 +49,7 @@ def signup(request):
         user.new_user(username, email, password)
         return render(request, 'main.html', data)
 
+# 게시판 페이지 설정
 def index(request):
     page = request.GET.get('page', '1')  # 페이지
     kw = request.GET.get('kw', '')  # 검색어
