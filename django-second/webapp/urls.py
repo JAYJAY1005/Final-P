@@ -33,5 +33,6 @@ urlpatterns = [
     # 대문 페이지 final/urls.py 가 아닌 main/urls.py 에서 받도록함
     
     path('QnA/', include('QnA.urls')), 
-    path('accounts/', include('allauth.urls')),
+    # path('accounts/', include('allauth.urls')),
+    path('app/', include('app.urls')),
 ]

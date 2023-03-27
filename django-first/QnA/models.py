@@ -10,6 +10,9 @@ class Question(models.Model):
     # 작성한 질문이 제목으로 보여지게 함
     def __str__(self):
         return self.subject
+    class Meta:
+        db_table = 'question'
+
 # 댓글란
 class Answer(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -17,3 +20,9 @@ class Answer(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField()
     modify_date = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.subject
+
+    class Meta:
+        db_table = 'answer'

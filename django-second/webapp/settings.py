@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,13 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app.apps.AppConfig',
+    
 
     # 로그인 기능 추가
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+    'app.apps.AppConfig',
 
     # 게시판 추가 
     'QnA.apps.QnaConfig',
@@ -89,6 +87,9 @@ DATABASES = {
         'PASSWORD': 'vmfhwprxm2xla!',
         'HOST': 'finalteam-db1.cwkyk5bf3ql5.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -133,14 +134,4 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTHENTICATION_BACKENDS = [
-     'django.contrib.auth.backends.ModelBackend',
-     'allauth.account.auth_backends.AuthenticationBackend',
- ]
 
-
-SITE_ID = 1
-
-ACCOUNT_EMAIL_REQUIRED = True # 회원 가입시 반드시 이메일 받기 기능 
-ACCOUNT_EMAIL_VERIFICATION = 'none' # 그 이메일이 맞는기 검증하는 기능은 작동하지 않게함
-LOGIN_REDIRECT_URL = '/main/' # 로그인 성공시 이동할 주소 현재 main 으로 설정

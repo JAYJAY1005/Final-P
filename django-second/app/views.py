@@ -1,43 +1,19 @@
-from django.db import connection
-from django.shortcuts import render
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from app.forms import UserForm
 
 
-# Create your views here.
-
-from django.http import HttpResponse, JsonResponse
-from django.utils.timezone import now
-
-from app.models import Question
-
-
-def index(request):
-    data = {
-        'userId': 'dooho',
-        'name': '함두호'
-    }
-
-    return JsonResponse(data)
-    #return render(request, 'index.html', {'page': 'index'})
-
-def question_insert(request):
-    subject = '제목제목'
-    content = '내용내용내용내용'
-    author = 'dooho'
-    pub_date = now
-    #1 MODEL
-    question = Question(subject=subject, content=content, author=author, pub_date=pub_date)
-    question.save()
-
-    #2 QUERY
-    cursor = connection.cursor()
-    result = cursor.execute(f"INSERT INTO question(subject, content, author, pub_date) VALUE ('{subject}','{content}','{author}', now())")
-    data = {
-        'userId': 'dooho',
-        'name': '함두호'
-    }
-
-    return JsonResponse(data)
-
-
-#def question_select(request):
-#
+def signup(request):
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)  # 사용자 인증
+            login(request, user)  # 로그인
+            return redirect('index')
+    else:
+        form = UserForm()
+    return render(request, 'app/signup.html', {'form': form})
